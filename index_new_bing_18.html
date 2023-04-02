@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Forecast</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .cold {
+            background-color: #4A90E2;
+            color: #fff;
+        }
+        .cool {
+            background-color: #7FBFFF;
+        }
+        .warm {
+            background-color: #FEDB41;
+        }
+        .hot {
+            background-color: #FF6F31;
+            color: #fff;
+        }
+        .wind-0 {
+            background-color: #fff;
+        }
+        .wind-1 {
+            background-color: #FFF2CC;
+        }
+        .wind-2 {
+            background-color: #FFE599;
+        }
+        .wind-3 {
+            background-color: #FFD966;
+        }
+        .wind-4 {
+            background-color: #FFC000;
+            color: #fff;
+        }
+        .wind-5 {
+            background-color: #E69138;
+            color: #fff;
+        }
+        .wind-6 {
+            background-color: #B45F06;
+            color: #fff;
+        }
+        .wind-7 {
+            background-color: #8B0000;
+            color: #fff;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Weather Forecast</h1>
+        <div class="table-responsive">
+            <table id="weatherTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date and Time</th>
+                        <th>Temperature</th>
+                        <th>Apparent Temperature</th>
+                        <th>Precipitation Probability</th>
+                        <th>Precipitation</th>
+                        <th>Cloud Cover</th>
+                        <th>Wind Speed</th>
+                        <th>Wind Gusts</th>
+                        <th>UV Index</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function formatDate(dateString) {
+            let date = new Date(dateString);
+            let year = date.getFullYear();
+            let month = ('0' + (date.getMonth() + 1)).slice(-2);
+            let day = ('0' + date.getDate()).slice(-2);
+            let hour = ('0' + date.getHours()).slice(-2);
+            return `${year}. ${month}. ${day}. - ${hour}:00`;
+        }
+
+        function getWeatherData(latitude, longitude) {
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,cloudcover,windspeed_10m,windgusts_10m,uv_index&models=best_match&forecast_days=3&timezone=auto`;
+            $.get(apiUrl, function(data) {
+                let weatherData = '';
+                let currentDate = new Date();
+                let currentHour = currentDate.getHours();
+                for (let i = currentHour; i < currentHour + 36; i++) {
+                    let tempColorClass = '';
+                    let appTempColorClass = '';
+                    let windSpeedColorClass = '';
+                    let windGustsColorClass = '';
+                    let temperature = data.hourly.temperature_2m[i];
+                    let appTemperature = data.hourly.apparent_temperature[i];
+                    let windSpeed = data.hourly.windspeed_10m[i];
+                    let windGusts = data.hourly.windgusts_10m[i];
+                    if (temperature < 5) {
+                        tempColorClass = 'cold';
+                    } else if (temperature >= 5 && temperature < 15) {
+                        tempColorClass = 'cool';
+                    } else if (temperature >= 15 && temperature < 25) {
+                        tempColorClass = 'warm';
+                    } else {
+                        tempColorClass = 'hot';
+                    }
+                    if (appTemperature < 5) {
+                        appTempColorClass = 'cold';
+                    } else if (appTemperature >= 5 && appTemperature < 15) {
+                        appTempColorClass = 'cool';
+                    } else if (appTemperature >= 15 && appTemperature < 25) {
+                        appTempColorClass = 'warm';
+                    } else {
+                        appTempColorClass = 'hot';
+                    }
+                    if (windSpeed === 0) {
+                        windSpeedColorClass = 'wind-0';
+                    } else if (windSpeed > 0 && windSpeed <= 5) {
+                        windSpeedColorClass = 'wind-1';
+                    } else if (windSpeed > 5 && windSpeed <= 10) {
+                        windSpeedColorClass = 'wind-2';
+                    } else if (windSpeed > 10 && windSpeed <= 15) {
+                        windSpeedColorClass = 'wind-3';
+                    } else if (windSpeed > 15 && windSpeed <= 20) {
+                        windSpeedColorClass = 'wind-4';
+                    } else if (windSpeed > 20 && windSpeed <= 25) {
+                        windSpeedColorClass = 'wind-5';
+                    } else if (windSpeed > 25 && windSpeed <= 30) {
+                        windSpeedColorClass = 'wind-6';
+                    } else {
+                        windSpeedColorClass = 'wind-7';
+                    }
+                    if (windGusts === 0) {
+                        windGustsColorClass = 'wind-0';
+                    } else if (windGusts > 0 && windGusts <= 5) {
+                        windGustsColorClass = 'wind-1';
+                    } else if (windGusts > 5 && windGusts <= 10) {
+                        windGustsColorClass = 'wind-2';
+                    } else if (windGusts > 10 && windGusts <= 15) {
+                        windGustsColorClass = 'wind-3';
+                    } else if (windGusts > 15 && windGusts <= 20) {
+                        windGustsColorClass = 'wind-4';
+                    } else if (windGusts > 20 && windGusts <= 25) {
+                        windGustsColorClass = 'wind-5';
+                    } else if (windGusts > 25 && windGusts <= 30) {
+                        windGustsColorClass = 'wind-6';
+                    } else {
+                        windGustsColorClass = 'wind-7';
+                    }
+                    weatherData += '<tr>';
+                    weatherData += '<td>' + formatDate(data.hourly.time[i]) + '</td>';
+                    weatherData += '<td class="' + tempColorClass + '">' + Math.round(temperature) + '</td>';
+                    weatherData += '<td class="' + appTempColorClass + '">' + Math.round(appTemperature) + '</td>';
+                    weatherData += '<td>' + Math.round(data.hourly.precipitation_probability[i]) + '</td>';
+                    weatherData += '<td>' + data.hourly.precipitation[i] + '</td>';
+                    weatherData += '<td>' + Math.round(data.hourly.cloudcover[i]) + '</td>';
+                    weatherData += '<td class="' + windSpeedColorClass + '">' + Math.round(windSpeed) + '</td>';
+                    weatherData += '<td class="' + windGustsColorClass + '">' + Math.round(windGusts) + '</td>';
+                    weatherData += '<td>' + Math.round(data.hourly.uv_index[i]) + '</td>';
+                    weatherData += '</tr>';
+                }
+                $('#weatherTable tbody').append(weatherData);
+            });
+        }
+
+        $(document).ready(function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    getWeatherData(position.coords.latitude, position.coords.longitude);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        });
+    </script>
+</body>
+</html>
